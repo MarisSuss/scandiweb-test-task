@@ -1,0 +1,19 @@
+{
+    "name": "susurs/backend",
+    "autoload": {
+    "psr-4": {
+        "Src\\": "src/"
+    }
+    },
+    "authors": [
+        {
+            "name": "Māris Suss",
+            "email": "marissuss@gmail.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6",
+        "webonyx/graphql-php": "^15.20",
+        "nikic/fast-route": "^1.3"
+    }
+}

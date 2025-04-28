@@ -1,0 +1,4 @@
+/backend/src/.env
+/backend/vendor/
+/frontend/node_modules/
+/.idea/
