@@ -19,4 +19,10 @@ class CategoryType extends ObjectType
             }
         ]);
     }
+
+    public static function getInstance(): self
+    {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
+    }
 }

@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\Type;
 
 class CategoryType extends ObjectType
 {
+    private static ?self $instance = null;
     public function __construct()
     {
         parent::__construct([
@@ -16,5 +17,11 @@ class CategoryType extends ObjectType
                 'name' => Type::string(),
             ],
         ]);
+    }
+
+    public static function getInstance(): self
+    {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
     }
 }

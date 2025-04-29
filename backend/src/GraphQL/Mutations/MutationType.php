@@ -9,13 +9,14 @@ use Src\GraphQL\Types\ProductType;
 
 class MutationType extends ObjectType
 {
+    private static ?self $instance = null;
     public function __construct()
     {
         parent::__construct([
             'name' => 'Mutation',
             'fields' => [
                 'addProduct' => [
-                    'type' => new ProductType(),
+                    'type' => ProductType::getInstance(),
                     'args' => [
                         'sku' => Type::nonNull(Type::string()),
                         'name' => Type::nonNull(Type::string()),
@@ -73,5 +74,11 @@ class MutationType extends ObjectType
                 ],
             ]
         ]);
+    }
+
+    public static function getInstance(): self
+    {
+        if (!self::$instance) self::$instance = new self();
+        return self::$instance;
     }
 }

@@ -1,69 +1,74 @@
 <?php
 require __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/Database/Connection.php';
 
 use Src\Database\Connection;
+
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../src');
+$dotenv->load();
 
 $db = new Connection();
 $pdo = $db->connect();
 
-echo "Starting migration and seeding...\n";
+echo "Starting fresh migration and seeding...\n";
 
-// --- 1. Create tables if not exist ---
+// --- DROP TABLES ---
+$pdo->exec("SET FOREIGN_KEY_CHECKS = 0;");
+$pdo->exec("DROP TABLE IF EXISTS products;");
+$pdo->exec("DROP TABLE IF EXISTS categories;");
+$pdo->exec("SET FOREIGN_KEY_CHECKS = 1;");
+echo "Dropped existing tables.\n";
 
-$pdo->exec("CREATE TABLE IF NOT EXISTS categories (
+// --- CREATE TABLES ---
+$pdo->exec("CREATE TABLE categories (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) UNIQUE NOT NULL
 );");
 
-echo "Checked/Created table: categories\n";
+echo "Created table: categories\n";
 
-$pdo->exec("CREATE TABLE IF NOT EXISTS products (
+$pdo->exec("CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
     sku VARCHAR(255) UNIQUE NOT NULL,
     name VARCHAR(255) NOT NULL,
     price DECIMAL(10,2) NOT NULL,
     brand VARCHAR(255) DEFAULT NULL,
-    gallery LONGTEXT DEFAULT NULL,
-    attributes LONGTEXT DEFAULT NULL,
+    gallery TEXT DEFAULT NULL,
+    attributes TEXT DEFAULT NULL,
     description TEXT DEFAULT NULL,
-    in_stock BOOLEAN DEFAULT NULL,
+    in_stock TINYINT(1) DEFAULT 0,
     category_id INT DEFAULT NULL,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE SET NULL
 );");
 
-echo "Checked/Created table: products\n";
+echo "Created table: products\n";
 
-// --- 2. Read data.json ---
-
+// --- READ JSON DATA ---
 $data = json_decode(file_get_contents(__DIR__ . '/../data.json'), true);
 
 if (!$data || !isset($data['data']['products'])) {
     die("Failed to read products from data.json\n");
 }
 
-// --- 3. Insert categories ---
-
+// --- INSERT CATEGORIES ---
 $categoryNames = [];
 foreach ($data['data']['categories'] as $category) {
     $name = $category['name'];
-    $stmt = $pdo->prepare("INSERT IGNORE INTO categories (name) VALUES (:name)");
+    $stmt = $pdo->prepare("INSERT INTO categories (name) VALUES (:name)");
     $stmt->execute([':name' => $name]);
     $categoryNames[$name] = true;
 }
 
-echo "Inserted/Checked all categories.\n";
+echo "Inserted categories.\n";
 
-// Create category name => id map
+// Build name-to-ID map
 $categoryMap = [];
 $stmt = $pdo->query("SELECT id, name FROM categories");
 foreach ($stmt as $row) {
     $categoryMap[$row['name']] = $row['id'];
 }
 
-// --- 4. Insert products ---
-
-$productInsert = $pdo->prepare("INSERT IGNORE INTO products (
+// --- INSERT PRODUCTS ---
+$productInsert = $pdo->prepare("INSERT INTO products (
     sku, name, price, brand, gallery, attributes, description, in_stock, category_id
 ) VALUES (
     :sku, :name, :price, :brand, :gallery, :attributes, :description, :in_stock, :category_id
@@ -75,9 +80,10 @@ foreach ($data['data']['products'] as $product) {
     $price = $product['prices'][0]['amount'] ?? 0;
     $brand = $product['brand'] ?? null;
     $gallery = isset($product['gallery']) ? json_encode($product['gallery']) : null;
-    $attributes = isset($product['attributes']) ? json_encode($product['attributes']) : null;
+    $attributes = isset($product['attributes']) && is_array($product['attributes'])
+        ? json_encode($product['attributes']) : json_encode([]);
     $description = strip_tags($product['description'] ?? '');
-    $inStock = isset($product['inStock']) ? (int) $product['inStock'] : null;
+    $inStock = isset($product['inStock']) ? (int) $product['inStock'] : 0;
     $categoryName = $product['category'] ?? null;
     $categoryId = $categoryName && isset($categoryMap[$categoryName]) ? $categoryMap[$categoryName] : null;
 
@@ -94,4 +100,5 @@ foreach ($data['data']['products'] as $product) {
     ]);
 }
 
-echo "Final Migration and Seeding complete!\n";
+echo "Inserted products.\n";
+echo "Migration and seeding complete.\n";

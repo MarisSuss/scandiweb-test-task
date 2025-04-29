@@ -13,8 +13,8 @@ use Throwable;
 class GraphQL {
     static public function handle() {
         try {
-            $queryType = new QueryType();
-            $mutationType = new MutationType();
+            $queryType = QueryType::getInstance();
+            $mutationType = MutationType::getInstance();
 
             $schema = new Schema(
                 (new SchemaConfig())

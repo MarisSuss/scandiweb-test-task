@@ -17,10 +17,25 @@ class QueryType extends ObjectType
                 'products' => [
                     'type' => Type::listOf(ProductType::getInstance()),
                     'resolve' => function () {
-                        return Product::getAllProducts();
+                        $pdo = (new \Src\Database\Connection())->connect();
+        $stmt = $pdo->query("SELECT * FROM products");
+        $products = [];
+        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+            $products[] = \Src\Models\ProductFactory::create($row);
+        }
+        return $products;
                     },
                 ],
             ],
         ]);
+    }
+
+    public static function getInstance(): self
+    {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new self();
+        }
+        return $instance;
     }
 }
