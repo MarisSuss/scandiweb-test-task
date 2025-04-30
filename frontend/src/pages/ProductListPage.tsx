@@ -15,11 +15,22 @@ const PRODUCT_LIST_QUERY = gql`
   }
 `;
 
-function ProductListPage() {
-  const [products, setProducts] = useState([]);
+interface Product {
+  id: number;
+  name: string;
+  price?: number; // Make price optional
+  sku: string;
+}
+
+interface ProductListResponse {
+  products: Product[];
+}
+
+function ProductListPage(): React.ReactElement {
+  const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    request(endpoint, PRODUCT_LIST_QUERY)
+    request<ProductListResponse>(endpoint, PRODUCT_LIST_QUERY)
       .then(data => {
         setProducts(data.products);
       })
@@ -39,9 +50,7 @@ function ProductListPage() {
           <button style={{ marginLeft: '1rem' }}>Mass Delete</button>
         </div>
       </div>
-
       <hr style={{ margin: '1rem 0' }} />
-
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         {products.map(product => (
           <div key={product.id} style={{ border: '1px solid #ccc', padding: '1rem', width: '200px' }}>
@@ -49,8 +58,8 @@ function ProductListPage() {
             <div><strong>{product.sku}</strong></div>
             <div>{product.name}</div>
             <div>
-              {product.price != null
-                ? `$${Number(product.price).toFixed(2)}`
+              {typeof product.price === 'number'
+                ? `$${product.price.toFixed(2)}`
                 : 'Price not available'}
             </div>
           </div>
