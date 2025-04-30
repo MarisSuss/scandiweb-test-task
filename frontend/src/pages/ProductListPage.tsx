@@ -18,7 +18,7 @@ const PRODUCT_LIST_QUERY = gql`
 interface Product {
   id: number;
   name: string;
-  price?: number; // Make price optional
+  price?: number;
   sku: string;
 }
 

@@ -5,7 +5,9 @@ namespace Src\GraphQL\Queries;
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Src\GraphQL\Types\ProductType;
-use Src\Models\Product;
+use Src\GraphQL\Types\CategoryType;
+use Src\Database\Connection;
+use PDO;
 
 class QueryType extends ObjectType
 {
@@ -14,6 +16,15 @@ class QueryType extends ObjectType
         parent::__construct([
             'name' => 'Query',
             'fields' => [
+                'categories' => [
+                    'type' => Type::listOf(CategoryType::getInstance()),
+                    'resolve' => function () {
+                        $db = new Connection();
+                        $pdo = $db->connect();
+                        $stmt = $pdo->query("SELECT id, name FROM categories");
+                        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+                    }
+                ],
                 'products' => [
                     'type' => Type::listOf(ProductType::getInstance()),
                     'resolve' => function () {
