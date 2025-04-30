@@ -3,14 +3,9 @@
 use FastRoute\RouteCollector;
 use function FastRoute\simpleDispatcher;
 use Src\Controller\GraphQL;
-use Src\Controller\HomeController;
 
 $dispatcher = simpleDispatcher(function(RouteCollector $r) {
-
-    $r->get('/', [HomeController::class, 'home']);
-
     $r->post('/graphql', [GraphQL::class, 'handle']);
-
 });
 
 $routeInfo = $dispatcher->dispatch(
