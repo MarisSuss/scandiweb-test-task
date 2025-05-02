@@ -4,9 +4,9 @@ import { gql, request } from 'graphql-request';
 
 const endpoint = 'http://localhost:8000/graphql';
 
-const PRODUCT_BY_SLUG_QUERY = gql`
-  query GetProductBySlug($slug: String!) {
-    product(slug: $slug) {
+const PRODUCT_BY_SKU_QUERY = gql`
+  query GetProductBySku($sku: String!) {
+    product(sku: $sku) {
       id
       name
       price
@@ -29,14 +29,14 @@ interface Product {
 }
 
 function ProductDetailsPage(): JSX.Element {
-  const { productSlug } = useParams();
+  const { sku } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!productSlug) return;
+    if (!sku) return;
 
-    request<{ product: Product }>(endpoint, PRODUCT_BY_SLUG_QUERY, { slug: productSlug })
+    request<{ product: Product }>(endpoint, PRODUCT_BY_SKU_QUERY, { sku })
       .then((data) => {
         setProduct(data.product);
       })
@@ -46,7 +46,7 @@ function ProductDetailsPage(): JSX.Element {
       .finally(() => {
         setLoading(false);
       });
-  }, [productSlug]);
+  }, [sku]);
 
   if (loading) return <div style={{ padding: '2rem' }}>Loading...</div>;
   if (!product) return <div style={{ padding: '2rem' }}>Product not found.</div>;

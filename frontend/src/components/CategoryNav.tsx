@@ -31,7 +31,7 @@ function CategoryNav(): JSX.Element {
       {categories.map((category) => (
         <Link
           key={category.name}
-          to={`/category/${category.name}`}
+          to={`/${category.name}`}
           style={{
             marginRight: '1rem',
             fontWeight: category.name === categoryName ? 'bold' : 'normal',

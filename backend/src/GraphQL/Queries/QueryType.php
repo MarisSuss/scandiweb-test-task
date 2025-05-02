@@ -25,17 +25,45 @@ class QueryType extends ObjectType
                         return $stmt->fetchAll(PDO::FETCH_ASSOC);
                     }
                 ],
+                'product' => [
+                    'type' => ProductType::getInstance(),
+                    'args' => [
+                        'sku' => Type::nonNull(Type::string())
+                    ],
+                    'resolve' => function ($root, $args) {
+                        $pdo = (new \Src\Database\Connection())->connect();
+                        $stmt = $pdo->prepare("SELECT * FROM products WHERE sku = :sku");
+                        $stmt->execute([':sku' => $args['sku']]);
+                        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+                        return $row ? \Src\Models\ProductFactory::create($row) : null;
+                    }
+                ],
                 'products' => [
                     'type' => Type::listOf(ProductType::getInstance()),
-                    'resolve' => function () {
+                    'args' => [
+                        'category' => Type::string()
+                    ],
+                    'resolve' => function ($root, $args) {
                         $pdo = (new \Src\Database\Connection())->connect();
-        $stmt = $pdo->query("SELECT * FROM products");
-        $products = [];
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $products[] = \Src\Models\ProductFactory::create($row);
-        }
-        return $products;
-                    },
+
+                        if (isset($args['category'])) {
+                            $stmt = $pdo->prepare("
+                                SELECT p.* FROM products p
+                                JOIN categories c ON p.category_id = c.id
+                                WHERE c.name = :category
+                            ");
+                            $stmt->execute([':category' => $args['category']]);
+                        } else {
+                            $stmt = $pdo->query("SELECT * FROM products");
+                        }
+
+                        $products = [];
+                        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                            $products[] = \Src\Models\ProductFactory::create($row);
+                        }
+
+                        return $products;
+                    }
                 ],
             ],
         ]);
