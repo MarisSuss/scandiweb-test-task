@@ -17,11 +17,11 @@ class ProductFactory {
 
         $product->id = $row['id'];
         $product->name = $row['name'];
+        $product->price = isset($row['price']) ? (float) $row['price'] : null;
         $product->inStock = (bool) $row['in_stock'];
         $product->gallery = json_decode($row['gallery'] ?? '[]', true);
         $product->description = $row['description'] ?? '';
         $product->brand = $row['brand'] ?? '';
-        $product->prices = json_decode($row['prices'] ?? '[]', true);
 
         $attributeSets = json_decode($row['attributes'] ?? '[]', true);
         foreach ($attributeSets as $setData) {

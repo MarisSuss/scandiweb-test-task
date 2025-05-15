@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { request, gql } from 'graphql-request';
 import { Link, useParams } from 'react-router-dom';
+import AddToCartButton from '../components/AddToCartButton';
 
 const endpoint = 'http://localhost:8000/graphql';
 
@@ -8,18 +9,22 @@ const PRODUCT_LIST_QUERY = gql`
   query GetProducts($category: String) {
     products(category: $category) {
       id
+      sku
       name
       price
-      sku
+      attributes {
+        name
+      }
     }
   }
 `;
 
 interface Product {
-  id: number;
-  name: string;
-  price?: number;
+  id: string;
   sku: string;
+  name: string;
+  price: number | string | null;
+  attributes: { name: string }[];
 }
 
 interface ProductListResponse {
@@ -48,21 +53,30 @@ function ProductListPage(): React.ReactElement {
       <hr style={{ margin: '1rem 0' }} />
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
         {products.map(product => (
-          <Link
-            key={product.id}
-            to={`/${category ?? 'all'}/${product.sku}`}
-            style={{ textDecoration: 'none', color: 'inherit' }}
-          >
-            <div style={{ border: '1px solid #ccc', padding: '1rem', width: '200px' }}>
-              <div><strong>{product.sku}</strong></div>
-              <div>{product.name}</div>
-              <div>
-                {typeof product.price === 'number'
-                  ? `$${product.price.toFixed(2)}`
-                  : 'Price not available'}
-              </div>
+          <div key={product.id} style={{ border: '1px solid #ccc', padding: '1rem', width: '200px' }}>
+            <div style={{ fontWeight: 'bold' }}>{product.name}</div>
+            <div>
+              Price:{' '}
+              {product.price !== null && !isNaN(Number(product.price))
+                ? `$${Number(product.price).toFixed(2)}`
+                : 'N/A'}
             </div>
-          </Link>
+            {product.attributes.length > 0 && (
+              <div style={{ fontSize: '0.85rem', color: '#666' }}>
+                Attributes: {product.attributes.map(attr => attr.name).join(', ')}
+              </div>
+            )}
+            <div style={{ marginTop: '1rem' }}>
+              <Link to={`/${category ?? 'all'}/${product.sku}`}>
+                <button style={{ marginRight: '0.5rem' }}>View</button>
+              </Link>
+              <AddToCartButton
+                sku={product.sku}
+                name={product.name}
+                price={Number(product.price) || 0}
+              />
+            </div>
+          </div>
         ))}
       </div>
     </div>

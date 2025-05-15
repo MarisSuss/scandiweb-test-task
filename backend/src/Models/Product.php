@@ -9,7 +9,7 @@ abstract class Product {
     public array $gallery;
     public string $description;
     public string $brand;
-    public array $prices;
+    public float $price;
     /** @var AttributeSet[] */
     public array $attributes = [];
 
