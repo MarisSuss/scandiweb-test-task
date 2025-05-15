@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { request, gql } from 'graphql-request';
-import { Link, useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import AddToCartButton from '../components/AddToCartButton';
 
 const endpoint = 'http://localhost:8000/graphql';
@@ -12,6 +12,9 @@ const PRODUCT_LIST_QUERY = gql`
       sku
       name
       price
+      category {
+        name
+      }
       attributes {
         name
       }
@@ -24,6 +27,9 @@ interface Product {
   sku: string;
   name: string;
   price: number | string | null;
+  category: {
+    name: string;
+  };
   attributes: { name: string }[];
 }
 
@@ -40,6 +46,7 @@ function ProductListPage(): React.ReactElement {
       category: category === 'all' ? undefined : category
     })
       .then(data => {
+        console.log('Loaded products:', data.products);
         setProducts(data.products);
       })
       .catch(err => {
@@ -61,13 +68,8 @@ function ProductListPage(): React.ReactElement {
                 ? `$${Number(product.price).toFixed(2)}`
                 : 'N/A'}
             </div>
-            {product.attributes.length > 0 && (
-              <div style={{ fontSize: '0.85rem', color: '#666' }}>
-                Attributes: {product.attributes.map(attr => attr.name).join(', ')}
-              </div>
-            )}
             <div style={{ marginTop: '1rem' }}>
-              <Link to={`/${category ?? 'all'}/${product.sku}`}>
+              <Link to={`/${product.category.name}/${product.sku}`}>
                 <button style={{ marginRight: '0.5rem' }}>View</button>
               </Link>
               <AddToCartButton

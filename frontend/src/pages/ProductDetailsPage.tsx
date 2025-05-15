@@ -15,19 +15,32 @@ const PRODUCT_BY_SKU_QUERY = gql`
       in_stock
       description
       gallery
+      category {
+        name
+      }
       attributes {
         name
         type
-        items
+        items {
+          id
+          value
+          displayValue
+        }
       }
     }
   }
 `;
 
+interface AttributeItem {
+  id: string;
+  value: string;
+  displayValue: string;
+}
+
 interface AttributeSet {
   name: string;
   type: string;
-  items: string[];
+  items: AttributeItem[];
 }
 
 interface Product {
@@ -38,16 +51,24 @@ interface Product {
   in_stock: boolean;
   description: string;
   gallery: string[];
+  category: {
+    name: string;
+  };
   attributes: AttributeSet[];
 }
 
 function ProductDetailsPage() {
-  const { sku } = useParams();
+  const params = useParams();
+  const sku = params.sku;
+
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    console.log("Route params:", params);
+    console.log("Extracted SKU:", sku);
+
     if (!sku) {
       setError(true);
       setLoading(false);
@@ -56,11 +77,12 @@ function ProductDetailsPage() {
 
     request<{ product: Product }>(endpoint, PRODUCT_BY_SKU_QUERY, { sku })
       .then((data) => {
+        console.log("GraphQL response:", data);
         if (!data.product) setError(true);
         else setProduct(data.product);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("GraphQL error:", err);
         setError(true);
       })
       .finally(() => {
@@ -74,6 +96,7 @@ function ProductDetailsPage() {
   return (
     <div style={{ padding: '2rem' }}>
       <h1>{product.name}</h1>
+      <p><strong>Category:</strong> {product.category.name}</p>
       <p><strong>Price:</strong> ${product.price.toFixed(2)}</p>
       <p><strong>Description:</strong> {product.description}</p>
 
@@ -90,16 +113,16 @@ function ProductDetailsPage() {
         <div key={idx} style={{ marginBottom: '1rem' }}>
           <p>{attrSet.name} ({attrSet.type}):</p>
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {attrSet.items.map((item, i) => (
+            {attrSet.items.map((item) => (
               <div
-                key={i}
+                key={item.id}
                 style={{
                   padding: '0.25rem 0.5rem',
                   border: '1px solid #ccc',
                   borderRadius: '4px'
                 }}
               >
-                {item}
+                {item.displayValue}
               </div>
             ))}
           </div>
