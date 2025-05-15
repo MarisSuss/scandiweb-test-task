@@ -25,6 +25,7 @@ class ProductType extends ObjectType
                     'description' => Type::string(),
                     'in_stock' => Type::boolean(),
                     'category_id' => Type::int(),
+                    'category' => CategoryType::getInstance(), // ✅ Nested category
                 ];
             }
         ]);

@@ -32,7 +32,12 @@ class QueryType extends ObjectType
                     ],
                     'resolve' => function ($root, $args) {
                         $pdo = (new \Src\Database\Connection())->connect();
-                        $stmt = $pdo->prepare("SELECT * FROM products WHERE sku = :sku");
+                        $stmt = $pdo->prepare("
+                            SELECT p.*, c.id AS category_id, c.name AS category_name
+                            FROM products p
+                            JOIN categories c ON p.category_id = c.id
+                            WHERE p.sku = :sku
+                        ");
                         $stmt->execute([':sku' => $args['sku']]);
                         $row = $stmt->fetch(\PDO::FETCH_ASSOC);
                         return $row ? \Src\Models\ProductFactory::create($row) : null;
@@ -48,13 +53,18 @@ class QueryType extends ObjectType
 
                         if (isset($args['category'])) {
                             $stmt = $pdo->prepare("
-                                SELECT p.* FROM products p
+                                SELECT p.*, c.id AS category_id, c.name AS category_name
+                                FROM products p
                                 JOIN categories c ON p.category_id = c.id
                                 WHERE c.name = :category
                             ");
                             $stmt->execute([':category' => $args['category']]);
                         } else {
-                            $stmt = $pdo->query("SELECT * FROM products");
+                            $stmt = $pdo->query("
+                                SELECT p.*, c.id AS category_id, c.name AS category_name
+                                FROM products p
+                                JOIN categories c ON p.category_id = c.id
+                            ");
                         }
 
                         $products = [];

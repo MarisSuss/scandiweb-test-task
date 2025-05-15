@@ -2,16 +2,22 @@
 
 namespace Src\Models;
 
-abstract class Product {
-    public string $id;
+use Src\Models\Category;
+
+class Product {
+    public int $id;
+    public string $sku;
     public string $name;
-    public bool $inStock;
-    public array $gallery;
-    public string $description;
-    public string $brand;
     public float $price;
-    /** @var AttributeSet[] */
+    public string $brand;
+    public array $gallery = [];
+    public string $description;
+    public bool $inStock;
     public array $attributes = [];
 
-    abstract public function getType(): string;
+    public Category $category;
+
+    public function getType(): string {
+        return 'base';
+    }
 }
