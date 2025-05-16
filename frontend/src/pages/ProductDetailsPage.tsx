@@ -1,126 +1,93 @@
-import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { request, gql } from 'graphql-request';
-import AddToCartButton from '../components/AddToCartButton';
+import { useQuery } from '@tanstack/react-query';
+import { gql, request } from 'graphql-request';
 
-const endpoint = 'http://localhost:8000/graphql';
-
-const PRODUCT_BY_SKU_QUERY = gql`
-  query GetProductBySku($sku: String!) {
+const QUERY = gql`
+  query getProductBySku($sku: String!) {
     product(sku: $sku) {
       id
-      sku
       name
-      price
-      in_stock
-      description
+      sku
+      brand
       gallery
-      category {
-        name
-      }
+      description
+      in_stock
+      price
       attributes {
+        id
         name
         type
         items {
           id
-          value
           displayValue
+          value
         }
       }
     }
   }
 `;
 
-interface AttributeItem {
-  id: string;
-  value: string;
+type AttributeItem = {
   displayValue: string;
-}
+  value: string;
+  id: string;
+};
 
-interface AttributeSet {
+type AttributeSet = {
+  id: string;
   name: string;
   type: string;
   items: AttributeItem[];
-}
+};
 
-interface Product {
-  id: number;
-  sku: string;
+type Product = {
+  id: string;
   name: string;
-  price: number;
-  in_stock: boolean;
-  description: string;
+  brand: string;
+  sku: string;
   gallery: string[];
-  category: {
-    name: string;
-  };
+  description: string;
+  in_stock: boolean;
+  price: number;
   attributes: AttributeSet[];
-}
+};
 
-function ProductDetailsPage() {
-  const params = useParams();
-  const sku = params.sku;
+export default function ProductDetailsPage() {
+  const { sku } = useParams();
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { data, isLoading } = useQuery<{ product: Product }>({
+    queryKey: ['product', sku],
+    queryFn: () => request('http://localhost:4000/graphql', QUERY, { sku })
+  });
 
-  useEffect(() => {
-    console.log("Route params:", params);
-    console.log("Extracted SKU:", sku);
+  const product = data?.product;
 
-    if (!sku) {
-      setError(true);
-      setLoading(false);
-      return;
-    }
-
-    request<{ product: Product }>(endpoint, PRODUCT_BY_SKU_QUERY, { sku })
-      .then((data) => {
-        console.log("GraphQL response:", data);
-        if (!data.product) setError(true);
-        else setProduct(data.product);
-      })
-      .catch((err) => {
-        console.error("GraphQL error:", err);
-        setError(true);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [sku]);
-
-  if (loading) return <div style={{ padding: '2rem' }}>Loading...</div>;
-  if (error || !product) return <div style={{ padding: '2rem' }}>Product not found.</div>;
+  if (isLoading) return <div>Loading...</div>;
+  if (!product) return <div>Product not found.</div>;
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>{product.name}</h1>
-      <p><strong>Category:</strong> {product.category.name}</p>
-      <p><strong>Price:</strong> ${product.price.toFixed(2)}</p>
-      <p><strong>Description:</strong> {product.description}</p>
+    <div className="p-8 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
+      <p className="text-gray-700 mb-4">Brand: {product.brand}</p>
+      <img
+        src={product.gallery[0]}
+        alt={product.name}
+        className="mb-4 w-full max-w-md object-cover"
+      />
+      <p className="mb-4">{product.description}</p>
 
-      {product.gallery.length > 0 && (
-        <img
-          src={product.gallery[0]}
-          alt={product.name}
-          style={{ width: '300px', marginBottom: '1rem' }}
-        />
-      )}
+      <p className="text-lg font-semibold mb-2">
+        ${product.price.toFixed(2)}
+      </p>
 
-      <p><strong>Attributes:</strong></p>
-      {product.attributes.map((attrSet, idx) => (
-        <div key={idx} style={{ marginBottom: '1rem' }}>
-          <p>{attrSet.name} ({attrSet.type}):</p>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
+      {product.attributes.map((attrSet) => (
+        <div key={attrSet.id} className="mb-4">
+          <h4 className="font-semibold mb-1">{attrSet.name}</h4>
+          <div className="flex gap-2">
             {attrSet.items.map((item) => (
               <div
                 key={item.id}
-                style={{
-                  padding: '0.25rem 0.5rem',
-                  border: '1px solid #ccc',
-                  borderRadius: '4px'
-                }}
+                className="border px-2 py-1 rounded text-sm"
               >
                 {item.displayValue}
               </div>
@@ -128,18 +95,6 @@ function ProductDetailsPage() {
           </div>
         </div>
       ))}
-
-      {product.in_stock ? (
-        <AddToCartButton
-          sku={product.sku}
-          name={product.name}
-          price={product.price}
-        />
-      ) : (
-        <p style={{ color: 'red', fontWeight: 'bold' }}>OUT OF STOCK</p>
-      )}
     </div>
   );
 }
-
-export default ProductDetailsPage;

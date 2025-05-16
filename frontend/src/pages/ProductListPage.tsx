@@ -1,88 +1,75 @@
-import React, { useEffect, useState } from 'react';
-import { request, gql } from 'graphql-request';
 import { useParams, Link } from 'react-router-dom';
-import AddToCartButton from '../components/AddToCartButton';
+import { useQuery } from '@tanstack/react-query';
+import { gql, request } from 'graphql-request';
 
-const endpoint = 'http://localhost:8000/graphql';
-
-const PRODUCT_LIST_QUERY = gql`
+const QUERY = gql`
   query GetProducts($category: String) {
     products(category: $category) {
       id
-      sku
       name
+      sku
+      brand
+      gallery
+      in_stock
+      description
       price
-      category {
-        name
-      }
-      attributes {
-        name
-      }
     }
   }
 `;
 
-interface Product {
+type Product = {
   id: string;
-  sku: string;
   name: string;
-  price: number | string | null;
-  category: {
-    name: string;
-  };
-  attributes: { name: string }[];
-}
+  sku: string;
+  brand: string;
+  gallery: string[];
+  in_stock: boolean;
+  description: string;
+  price: number;
+};
 
-interface ProductListResponse {
+type ProductQueryResult = {
   products: Product[];
-}
+};
 
-function ProductListPage(): React.ReactElement {
-  const { category } = useParams();
-  const [products, setProducts] = useState<Product[]>([]);
+export default function ProductListPage() {
+  const { category = 'all' } = useParams();
 
-  useEffect(() => {
-    request<ProductListResponse>(endpoint, PRODUCT_LIST_QUERY, {
-      category: category === 'all' ? undefined : category
-    })
-      .then(data => {
-        console.log('Loaded products:', data.products);
-        setProducts(data.products);
-      })
-      .catch(err => {
-        console.error('GraphQL error:', err);
-      });
-  }, [category]);
+  const { data, isLoading, error } = useQuery<ProductQueryResult>({
+    queryKey: ['categoryProducts', category],
+    queryFn: () =>
+      request('http://localhost:4000/graphql', QUERY, {
+        category: category === 'all' ? undefined : category,
+      }),
+  });
+
+  if (isLoading) return <div className="p-8">Loading...</div>;
+  if (error) return <div className="p-8 text-red-600">Error loading products.</div>;
+
+  const products = data?.products ?? [];
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>{category ? `${category}` : 'All Products'}</h1>
-      <hr style={{ margin: '1rem 0' }} />
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
-        {products.map(product => (
-          <div key={product.id} style={{ border: '1px solid #ccc', padding: '1rem', width: '200px' }}>
-            <div style={{ fontWeight: 'bold' }}>{product.name}</div>
-            <div>
-              Price:{' '}
-              {product.price !== null && !isNaN(Number(product.price))
-                ? `$${Number(product.price).toFixed(2)}`
-                : 'N/A'}
-            </div>
-            <div style={{ marginTop: '1rem' }}>
-              <Link to={`/${product.category.name}/${product.sku}`}>
-                <button style={{ marginRight: '0.5rem' }}>View</button>
+    <div className="p-8">
+      <h1 className="text-2xl font-semibold capitalize mb-4">{category}</h1>
+      {products.length === 0 ? (
+        <p>No products found.</p>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          {products.map((product) => (
+            <div key={product.id} className="border p-4 rounded shadow">
+              <Link to={`/${category}/${product.sku}`}>
+                <img
+                  src={product.gallery?.[0]}
+                  alt={product.name}
+                  className="mb-2 w-full h-48 object-cover"
+                />
+                <h2 className="font-medium">{product.name}</h2>
+                <p className="text-gray-600">${product.price.toFixed(2)}</p>
               </Link>
-              <AddToCartButton
-                sku={product.sku}
-                name={product.name}
-                price={Number(product.price) || 0}
-              />
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
-
-export default ProductListPage;
