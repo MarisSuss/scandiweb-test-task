@@ -1,10 +1,12 @@
-import React from 'react';
 import { Link, Outlet, useParams } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const categories = ['all', 'clothes', 'tech'];
 
 export default function Layout() {
   const { category } = useParams();
+  const { state } = useCart();
+  const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
     <div className="min-h-screen font-sans bg-white text-gray-900">
@@ -24,8 +26,17 @@ export default function Layout() {
             </Link>
           ))}
         </div>
-        <div className="text-xl">🛒</div>
+
+        <Link to="/cart" className="relative text-xl">
+          🛒
+          {totalItems > 0 && (
+            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+              {totalItems}
+            </span>
+          )}
+        </Link>
       </header>
+
       <main className="p-8 max-w-7xl mx-auto">
         <Outlet />
       </main>
