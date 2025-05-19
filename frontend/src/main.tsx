@@ -8,6 +8,8 @@ import Layout from './components/Layout';
 import ProductListPage from './pages/ProductListPage';
 import ProductDetailsPage from './pages/ProductDetailsPage';
 import { CartProvider } from './context/CartContext';
+import CartPage from './pages/CartPage';
+
 
 const queryClient = new QueryClient();
 
@@ -19,8 +21,9 @@ root.render(
         <Router>
           <Routes>
             <Route path="/" element={<Layout />}>
-              <Route path=":category/:sku" element={<ProductDetailsPage />} />
-              <Route path=":category?" element={<ProductListPage />} />
+            <Route path="cart" element={<CartPage />} />
+            <Route path=":category/:sku" element={<ProductDetailsPage />} />
+            <Route path=":category?" element={<ProductListPage />} />
             </Route>
           </Routes>
         </Router>

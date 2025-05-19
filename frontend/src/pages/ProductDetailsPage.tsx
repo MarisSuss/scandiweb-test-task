@@ -1,6 +1,8 @@
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { gql, request } from 'graphql-request';
+import AddToCartButton from '../components/AddToCartButton';
 
 const QUERY = gql`
   query getProductBySku($sku: String!) {
@@ -54,16 +56,21 @@ type Product = {
 
 export default function ProductDetailsPage() {
   const { sku } = useParams();
+  const [selectedAttributes, setSelectedAttributes] = useState<{ [key: string]: string }>({});
 
   const { data, isLoading } = useQuery<{ product: Product }>({
     queryKey: ['product', sku],
-    queryFn: () => request('http://localhost:4000/graphql', QUERY, { sku })
+    queryFn: () => request('http://localhost:4000/graphql', QUERY, { sku }),
   });
 
   const product = data?.product;
 
   if (isLoading) return <div>Loading...</div>;
   if (!product) return <div>Product not found.</div>;
+
+  const handleSelectAttribute = (attrId: string, value: string) => {
+    setSelectedAttributes((prev) => ({ ...prev, [attrId]: value }));
+  };
 
   return (
     <div className="p-8 max-w-4xl mx-auto">
@@ -84,17 +91,25 @@ export default function ProductDetailsPage() {
         <div key={attrSet.id} className="mb-4">
           <h4 className="font-semibold mb-1">{attrSet.name}</h4>
           <div className="flex gap-2">
-            {attrSet.items.map((item) => (
-              <div
-                key={item.id}
-                className="border px-2 py-1 rounded text-sm"
-              >
-                {item.displayValue}
-              </div>
-            ))}
+            {attrSet.items.map((item) => {
+              const isSelected = selectedAttributes[attrSet.id] === item.id;
+              return (
+                <button
+                  key={item.id}
+                  className={`border px-3 py-1 rounded text-sm ${
+                    isSelected ? 'bg-blue-600 text-white' : 'bg-white'
+                  }`}
+                  onClick={() => handleSelectAttribute(attrSet.id, item.id)}
+                >
+                  {item.displayValue}
+                </button>
+              );
+            })}
           </div>
         </div>
       ))}
+
+      <AddToCartButton product={product} selectedAttributes={selectedAttributes} />
     </div>
   );
 }

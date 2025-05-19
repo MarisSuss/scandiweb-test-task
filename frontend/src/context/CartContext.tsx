@@ -1,52 +1,105 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useReducer } from 'react';
 
-interface CartItem {
-  sku: string;
+type SelectedAttribute = {
+  [attributeId: string]: string;
+};
+
+type CartItem = {
+  id: string;
   name: string;
   price: number;
+  gallery: string[];
   quantity: number;
-  attributes: string[];
-}
+  selectedAttributes: SelectedAttribute;
+};
 
 type CartState = {
   items: CartItem[];
 };
 
 type Action =
-  | { type: 'ADD_TO_CART'; item: CartItem }
-  | { type: 'REMOVE_FROM_CART'; sku: string };
+  | { type: 'ADD_TO_CART'; payload: CartItem }
+  | { type: 'REMOVE_FROM_CART'; payload: string }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
+  | { type: 'CLEAR_CART' };
 
-const CartContext = createContext<{ state: CartState; dispatch: React.Dispatch<Action> } | undefined>(undefined);
+const CartContext = createContext<{
+  state: CartState;
+  dispatch: React.Dispatch<Action>;
+} | undefined>(undefined);
 
-const cartReducer = (state: CartState, action: Action): CartState => {
+// Updates to the cart
+function cartReducer(state: CartState, action: Action): CartState {
   switch (action.type) {
     case 'ADD_TO_CART': {
-      const existing = state.items.find(i => i.sku === action.item.sku);
+      const existing = state.items.find(item =>
+        item.id === action.payload.id &&
+        JSON.stringify(item.selectedAttributes) === JSON.stringify(action.payload.selectedAttributes)
+      );
       if (existing) {
         return {
-          items: state.items.map(i =>
-            i.sku === action.item.sku
-              ? { ...i, quantity: i.quantity + action.item.quantity }
-              : i
+          ...state,
+          items: state.items.map(item =>
+            item === existing
+              ? { ...item, quantity: item.quantity + action.payload.quantity }
+              : item
           ),
         };
+      } else {
+        return {
+          ...state,
+          items: [...state.items, action.payload],
+        };
       }
-      return { items: [...state.items, action.item] };
     }
+
     case 'REMOVE_FROM_CART':
-      return { items: state.items.filter(i => i.sku !== action.sku) };
+      return {
+        ...state,
+        items: state.items.filter(item => item.id !== action.payload),
+      };
+
+    case 'UPDATE_QUANTITY':
+      return {
+        ...state,
+        items: state.items.map(item =>
+          item.id === action.payload.id
+            ? { ...item, quantity: action.payload.quantity }
+            : item
+        ),
+      };
+
+    case 'CLEAR_CART':
+      return { items: [] };
+
     default:
       return state;
   }
+}
+
+const initialState: CartState = {
+  items: [],
 };
 
-export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
-  return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>;
+export const CartProvider = ({ children }: { children: React.ReactNode }) => {
+  const [state, dispatch] = useReducer(cartReducer, initialState, () => {
+    const saved = localStorage.getItem('cart');
+    return saved ? JSON.parse(saved) : initialState;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(state));
+  }, [state]);
+
+  return (
+    <CartContext.Provider value={{ state, dispatch }}>
+      {children}
+    </CartContext.Provider>
+  );
 };
 
-export const useCart = () => {
+export function useCart() {
   const context = useContext(CartContext);
-  if (!context) throw new Error('useCart must be used within a CartProvider');
+  if (!context) throw new Error('useCart must be used inside CartProvider');
   return context;
-};
+}
