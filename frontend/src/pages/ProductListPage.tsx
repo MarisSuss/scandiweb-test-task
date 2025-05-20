@@ -55,19 +55,36 @@ export default function ProductListPage() {
         <p>No products found.</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {products.map((product) => (
-            <div key={product.id} className="border p-4 rounded shadow">
-              <Link to={`/${category}/${product.sku}`}>
-                <img
-                  src={product.gallery?.[0]}
-                  alt={product.name}
-                  className="mb-2 w-full h-48 object-cover"
-                />
-                <h2 className="font-medium">{product.name}</h2>
-                <p className="text-gray-600">${product.price.toFixed(2)}</p>
-              </Link>
-            </div>
-          ))}
+          {products.map((product) => {
+            const isInStock =
+              product.in_stock === true;
+
+            return (
+              <div
+                key={product.id}
+                className={`relative border p-4 rounded shadow transition ${
+                  !isInStock ? 'opacity-60' : ''
+                }`}
+              >
+                <Link to={`/${category}/${product.sku}`}>
+                  <div className="relative mb-2">
+                    <img
+                      src={product.gallery[0]}
+                      alt={product.name}
+                      className="w-full h-48 object-cover"
+                    />
+                    {!isInStock && (
+                      <span className="absolute top-1 left-1 bg-black text-white text-xs px-2 py-1">
+                        OUT OF STOCK
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="font-medium">{product.name}</h2>
+                  <p className="text-gray-600">${product.price.toFixed(2)}</p>
+                </Link>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

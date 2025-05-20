@@ -12,7 +12,7 @@ class Product {
     public string $brand;
     public array $gallery = [];
     public string $description;
-    public bool $inStock;
+    public bool $in_stock;
     public array $attributes = [];
 
     public Category $category;

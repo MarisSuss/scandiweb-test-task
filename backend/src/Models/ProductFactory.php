@@ -23,11 +23,11 @@ class ProductFactory {
         $product->sku = $row['sku'] ?? '';
         $product->name = $row['name'];
         $product->price = isset($row['price']) ? (float) $row['price'] : null;
-        $product->inStock = (bool) $row['in_stock'];
+        $product->in_stock = (bool) $row['in_stock'];
         $product->gallery = json_decode($row['gallery'] ?? '[]', true);
         $product->description = $row['description'] ?? '';
         $product->brand = $row['brand'] ?? '';
-        
+
         $attributeSets = json_decode($row['attributes'] ?? '[]', true);
         foreach ($attributeSets as $setData) {
             $set = new AttributeSet();
