@@ -101,4 +101,21 @@ foreach ($data['data']['products'] as $product) {
 }
 
 echo "Inserted products.\n";
+
+// Create orders table
+$pdo->exec("CREATE TABLE IF NOT EXISTS orders (
+    id INT AUTO_INCREMENT PRIMARY KEY
+)");
+
+// Create order_items table
+$pdo->exec("CREATE TABLE IF NOT EXISTS order_items (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT,
+    product_id INT,
+    quantity INT,
+    selected_attributes TEXT,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
+)");
+
+echo "Order and order items table created.\n";
 echo "Migration and seeding complete.\n";
