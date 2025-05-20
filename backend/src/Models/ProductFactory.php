@@ -8,7 +8,8 @@ use Src\Models\Category;
 
 class ProductFactory {
     public static function create(array $row): Product {
-        $type = $row['category'] ?? 'default';
+        $type = strtolower($row['category'] ?? 'default');
+
         $product = match ($type) {
             'tech' => new TechProduct(),
             'clothes' => new ClothesProduct(),
@@ -46,7 +47,7 @@ class ProductFactory {
 
         $category = new Category();
         $category->id = $row['category_id'];
-        $category->name = $row['category_name'];
+        $category->name = $row['category'];
         $product->category = $category;
 
         return $product;

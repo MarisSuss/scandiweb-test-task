@@ -19,13 +19,13 @@ const QUERY = gql`
 
 type Product = {
   id: string;
-  name: string;
-  sku: string;
-  brand: string;
-  gallery: string[];
-  in_stock: boolean;
-  description: string;
-  price: number;
+  name?: string;
+  sku?: string;
+  brand?: string;
+  gallery?: string[];
+  in_stock?: boolean;
+  description?: string;
+  price?: number;
 };
 
 type ProductQueryResult = {
@@ -37,14 +37,26 @@ export default function ProductListPage() {
 
   const { data, isLoading, error } = useQuery<ProductQueryResult>({
     queryKey: ['categoryProducts', category],
-    queryFn: () =>
-      request('http://localhost:4000/graphql', QUERY, {
+    queryFn: async (): Promise<ProductQueryResult> => {
+      const res = await request<ProductQueryResult>('http://localhost:4000/graphql', QUERY, {
         category: category === 'all' ? undefined : category,
-      }),
+      });
+
+      if (!res || !res.products) {
+        return { products: [] };
+      }
+
+      return res;
+    }
   });
 
   if (isLoading) return <div className="p-8">Loading...</div>;
-  if (error) return <div className="p-8 text-red-600">Error loading products.</div>;
+  if (error) return (
+    <div className="p-8 text-red-600">
+      Error loading products:<br />
+      <pre>{error.message}</pre>
+    </div>
+  );
 
   const products = data?.products ?? [];
 
@@ -56,8 +68,7 @@ export default function ProductListPage() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           {products.map((product) => {
-            const isInStock =
-              product.in_stock === true;
+            const isInStock = product.in_stock ?? true;
 
             return (
               <div
@@ -66,11 +77,11 @@ export default function ProductListPage() {
                   !isInStock ? 'opacity-60' : ''
                 }`}
               >
-                <Link to={`/${category}/${product.sku}`}>
+                <Link to={`/${category}/${product.sku ?? product.id}`}>
                   <div className="relative mb-2">
                     <img
-                      src={product.gallery[0]}
-                      alt={product.name}
+                      src={product.gallery?.[0] ?? 'https://via.placeholder.com/200'}
+                      alt={product.name ?? 'Product'}
                       className="w-full h-48 object-cover"
                     />
                     {!isInStock && (
@@ -79,8 +90,10 @@ export default function ProductListPage() {
                       </span>
                     )}
                   </div>
-                  <h2 className="font-medium">{product.name}</h2>
-                  <p className="text-gray-600">${product.price.toFixed(2)}</p>
+                  <h2 className="font-medium">{product.name ?? 'Unnamed Product'}</h2>
+                  <p className="text-gray-600">
+                    ${product.price?.toFixed(2) ?? '?.??'}
+                  </p>
                 </Link>
               </div>
             );

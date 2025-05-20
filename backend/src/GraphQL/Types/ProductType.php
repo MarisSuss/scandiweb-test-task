@@ -25,17 +25,17 @@ class ProductType extends ObjectType
                     'description' => Type::string(),
                     'in_stock' => Type::boolean(),
                     'category_id' => Type::int(),
-                    'category' => CategoryType::getInstance(), // ✅ Nested category
+                    'category' => CategoryType::getInstance(),
                 ];
             }
         ]);
     }
 
-    public static function getInstance(): self
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
+    public static function getInstance(): self {
+        static $instance = null;
+        if ($instance === null) {
+            $instance = new self();
         }
-        return self::$instance;
+        return $instance;
     }
 }

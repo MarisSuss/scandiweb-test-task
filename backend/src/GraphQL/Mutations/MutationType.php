@@ -1,6 +1,6 @@
 <?php
 
-namespace Src\GraphQL;
+namespace Src\GraphQL\Mutations;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
@@ -18,7 +18,7 @@ class MutationType extends ObjectType
             'name' => 'Mutation',
             'fields' => [
                 'addProduct' => [
-                    'type' => new ProductType(),
+                    'type' => ProductType::getInstance(),
                     'args' => [
                         'sku' => Type::nonNull(Type::string()),
                         'name' => Type::nonNull(Type::string()),
@@ -51,7 +51,7 @@ class MutationType extends ObjectType
                     }
                 ],
                 'updateProduct' => [
-                    'type' => new ProductType(),
+                    'type' => ProductType::getInstance(),
                     'args' => [
                         'id' => Type::nonNull(Type::int()),
                         'name' => Type::string(),

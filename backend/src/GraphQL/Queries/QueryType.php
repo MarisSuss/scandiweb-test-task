@@ -33,14 +33,19 @@ class QueryType extends ObjectType
                     'resolve' => function ($root, $args) {
                         $pdo = (new \Src\Database\Connection())->connect();
                         $stmt = $pdo->prepare("
-                            SELECT p.*, c.id AS category_id, c.name AS category_name
+                            SELECT p.*, c.id AS category_id, c.name AS category
                             FROM products p
                             JOIN categories c ON p.category_id = c.id
                             WHERE p.sku = :sku
                         ");
                         $stmt->execute([':sku' => $args['sku']]);
-                        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
-                        return $row ? \Src\Models\ProductFactory::create($row) : null;
+                        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                        if (!$row) {
+                            return null;
+                        }
+
+                        return \Src\Models\ProductFactory::create($row);
                     }
                 ],
                 'products' => [
@@ -51,40 +56,31 @@ class QueryType extends ObjectType
                     'resolve' => function ($root, $args) {
                         $pdo = (new \Src\Database\Connection())->connect();
 
-                        if (isset($args['category'])) {
-                            $stmt = $pdo->prepare("
-                                SELECT p.*, c.id AS category_id, c.name AS category_name
-                                FROM products p
-                                JOIN categories c ON p.category_id = c.id
-                                WHERE c.name = :category
-                            ");
-                            $stmt->execute([':category' => $args['category']]);
-                        } else {
+                        if (!isset($args['category']) || strtolower($args['category']) === 'all') {
                             $stmt = $pdo->query("
-                                SELECT p.*, c.id AS category_id, c.name AS category_name
+                                SELECT p.*, c.id AS category_id, c.name AS category
                                 FROM products p
                                 JOIN categories c ON p.category_id = c.id
                             ");
+                        } else {
+                            $stmt = $pdo->prepare("
+                                SELECT p.*, c.id AS category_id, c.name AS category
+                                FROM products p
+                                JOIN categories c ON p.category_id = c.id
+                                WHERE LOWER(c.name) = :category
+                            ");
+                            $stmt->execute([':category' => strtolower($args['category'])]);
                         }
 
                         $products = [];
-                        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+                        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                             $products[] = \Src\Models\ProductFactory::create($row);
                         }
 
                         return $products;
                     }
-                ],
-            ],
+                ]
+            ]
         ]);
-    }
-
-    public static function getInstance(): self
-    {
-        static $instance = null;
-        if ($instance === null) {
-            $instance = new self();
-        }
-        return $instance;
     }
 }
