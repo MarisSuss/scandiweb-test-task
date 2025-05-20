@@ -4,6 +4,13 @@ type SelectedAttribute = {
   [attributeId: string]: string;
 };
 
+type AttributeSet = {
+  id: string;
+  name: string;
+  type: string;
+  items: { id: string; value: string; displayValue: string }[];
+};
+
 type CartItem = {
   id: string;
   name: string;
@@ -11,6 +18,7 @@ type CartItem = {
   gallery: string[];
   quantity: number;
   selectedAttributes: SelectedAttribute;
+  attributes: AttributeSet[];
 };
 
 type CartState = {
@@ -19,8 +27,8 @@ type CartState = {
 
 type Action =
   | { type: 'ADD_TO_CART'; payload: CartItem }
-  | { type: 'REMOVE_FROM_CART'; payload: string }
-  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
+  | { type: 'REMOVE_FROM_CART'; payload: { id: string; selectedAttributes: SelectedAttribute } }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number; selectedAttributes: SelectedAttribute } }
   | { type: 'CLEAR_CART' };
 
 const CartContext = createContext<{
@@ -28,20 +36,21 @@ const CartContext = createContext<{
   dispatch: React.Dispatch<Action>;
 } | undefined>(undefined);
 
-// Updates to the cart
 function cartReducer(state: CartState, action: Action): CartState {
   switch (action.type) {
-    case 'ADD_TO_CART': {
-      const existing = state.items.find(item =>
-        item.id === action.payload.id &&
-        JSON.stringify(item.selectedAttributes) === JSON.stringify(action.payload.selectedAttributes)
+    case 'ADD_TO_CART':
+      const existingItem = state.items.find(
+        item =>
+          item.id === action.payload.id &&
+          JSON.stringify(item.selectedAttributes) === JSON.stringify(action.payload.selectedAttributes)
       );
-      if (existing) {
+      if (existingItem) {
         return {
           ...state,
           items: state.items.map(item =>
-            item === existing
-              ? { ...item, quantity: item.quantity + action.payload.quantity }
+            item.id === action.payload.id &&
+            JSON.stringify(item.selectedAttributes) === JSON.stringify(action.payload.selectedAttributes)
+              ? { ...item, quantity: item.quantity + 1 }
               : item
           ),
         };
@@ -51,55 +60,61 @@ function cartReducer(state: CartState, action: Action): CartState {
           items: [...state.items, action.payload],
         };
       }
-    }
 
     case 'REMOVE_FROM_CART':
       return {
         ...state,
-        items: state.items.filter(item => item.id !== action.payload),
+        items: state.items.filter(
+          item =>
+            item.id !== action.payload.id ||
+            JSON.stringify(item.selectedAttributes) !== JSON.stringify(action.payload.selectedAttributes)
+        ),
       };
 
     case 'UPDATE_QUANTITY':
       return {
         ...state,
         items: state.items.map(item =>
-          item.id === action.payload.id
+          item.id === action.payload.id &&
+          JSON.stringify(item.selectedAttributes) === JSON.stringify(action.payload.selectedAttributes)
             ? { ...item, quantity: action.payload.quantity }
             : item
         ),
       };
 
     case 'CLEAR_CART':
-      return { items: [] };
+      return { ...state, items: [] };
 
     default:
       return state;
   }
 }
 
-const initialState: CartState = {
-  items: [],
-};
-
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, initialState, () => {
-    const saved = localStorage.getItem('cart');
-    return saved ? JSON.parse(saved) : initialState;
-  });
+export function CartProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(cartReducer, { items: [] });
 
   useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(state));
-  }, [state]);
+    const stored = localStorage.getItem('cart');
+    if (stored) {
+      try {
+        dispatch({ type: 'CLEAR_CART' });
+        const parsed = JSON.parse(stored);
+        parsed.forEach((item: CartItem) => {
+          dispatch({ type: 'ADD_TO_CART', payload: item });
+        });
+      } catch {}
+    }
+  }, []);
 
-  return (
-    <CartContext.Provider value={{ state, dispatch }}>
-      {children}
-    </CartContext.Provider>
-  );
-};
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(state.items));
+  }, [state.items]);
+
+  return <CartContext.Provider value={{ state, dispatch }}>{children}</CartContext.Provider>;
+}
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (!context) throw new Error('useCart must be used inside CartProvider');
+  if (!context) throw new Error('useCart must be used within CartProvider');
   return context;
 }

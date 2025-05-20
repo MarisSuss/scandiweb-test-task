@@ -1,11 +1,15 @@
 import { useCart } from '../context/CartContext';
 
-export default function AddToCartButton({ product }: { product: any }) {
+export default function AddToCartButton({
+  product,
+  selectedAttributes,
+}: {
+  product: any;
+  selectedAttributes: { [key: string]: string };
+}) {
   const { dispatch } = useCart();
 
   const handleAdd = () => {
-    const selectedAttributes = {};
-
     dispatch({
       type: 'ADD_TO_CART',
       payload: {
@@ -15,6 +19,7 @@ export default function AddToCartButton({ product }: { product: any }) {
         gallery: product.gallery,
         quantity: 1,
         selectedAttributes,
+        attributes: product.attributes,
       },
     });
   };
