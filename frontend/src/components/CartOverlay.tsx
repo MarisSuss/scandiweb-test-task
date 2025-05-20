@@ -1,14 +1,31 @@
 import { useCart } from '../context/CartContext';
+import { gql, request } from 'graphql-request';
+
+const ADD_ORDER = gql`
+  mutation AddOrder($input: [OrderItemInput!]!) {
+    addOrder(input: $input) {
+      success
+      orderId
+    }
+  }
+`;
+
+interface AddOrderResponse {
+  addOrder: {
+    success: boolean;
+    orderId: number;
+  };
+}
 
 export default function CartOverlay({ onClose }: { onClose: () => void }) {
   const { state, dispatch } = useCart();
   const total = state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  const handleQuantityChange: (
+  const handleQuantityChange = (
     id: string,
     selectedAttributes: { [key: string]: string },
     newQty: number
-  ) => void = (id, selectedAttributes, newQty) => {
+  ) => {
     if (newQty <= 0) {
       dispatch({ type: 'REMOVE_FROM_CART', payload: { id, selectedAttributes } });
     } else {
@@ -16,6 +33,29 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
         type: 'UPDATE_QUANTITY',
         payload: { id, quantity: newQty, selectedAttributes },
       });
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (state.items.length === 0) return;
+
+    const input = state.items.map(item => ({
+      product_id: parseInt(item.id),
+      quantity: item.quantity,
+      selectedAttributes: JSON.stringify(item.selectedAttributes)
+    }));
+
+    try {
+      const response: AddOrderResponse = await request('http://localhost:4000/graphql', ADD_ORDER, { input });
+      if (response.addOrder.success) {
+        alert(`Order placed! ID: ${response.addOrder.orderId}`);
+        dispatch({ type: 'CLEAR_CART' });
+        onClose();
+      } else {
+        alert('Failed to place order.');
+      }
+    } catch (err: any) {
+      alert('Error placing order: ' + err.message);
     }
   };
 
@@ -112,11 +152,7 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
         </div>
 
         <button
-          onClick={() => {
-            dispatch({ type: 'CLEAR_CART' });
-            onClose();
-            alert('Order placed!');
-          }}
+          onClick={handlePlaceOrder}
           className="w-full bg-green-600 text-white py-3 font-bold rounded hover:bg-green-700 transition"
         >
           PLACE ORDER

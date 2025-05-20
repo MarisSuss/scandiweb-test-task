@@ -1,4 +1,5 @@
-import React, {JSX ,useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import type { JSX } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { request, gql } from 'graphql-request';
 
