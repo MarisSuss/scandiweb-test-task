@@ -63,7 +63,7 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
     <>
       <div
         onClick={onClose}
-        className="absolute top-16 left-0 w-full h-[calc(100%-4rem)] z-40"
+        className="absolute top-19 left-0 w-full h-[calc(100%-4rem)] z-40"
         style={{
           backgroundColor: 'rgba(0, 0, 0, 0.1)',
         }}

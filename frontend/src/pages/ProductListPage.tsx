@@ -62,7 +62,7 @@ export default function ProductListPage() {
 
   return (
     <div className=" py-10">
-      <h1 className="text-2xl font-semibold capitalize mb-4">{category}</h1>
+      <h1 className="text-4xl font-semibold capitalize mb-4">{category}</h1>
       {products.length === 0 ? (
         <p>No products found.</p>
       ) : (
