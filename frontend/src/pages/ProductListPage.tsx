@@ -73,7 +73,7 @@ export default function ProductListPage() {
             return (
               <div
                 key={product.id}
-                className={`relative border p-4 rounded shadow transition ${
+                className={`relative p-4 ${
                   !isInStock ? 'opacity-60' : ''
                 }`}
               >
@@ -82,7 +82,7 @@ export default function ProductListPage() {
                     <img
                       src={product.gallery?.[0] ?? 'https://via.placeholder.com/200'}
                       alt={product.name ?? 'Product'}
-                      className="w-full h-48 object-cover"
+                      className="w-full aspect-square object-cover"
                     />
                     {!isInStock && (
                       <span className="absolute top-1 left-1 bg-black text-white text-xs px-2 py-1">

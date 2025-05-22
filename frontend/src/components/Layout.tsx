@@ -13,7 +13,7 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen font-sans bg-white text-gray-900">
-      <header className="border-b border-gray-200 py-4 px-6 flex items-center justify-between">
+      <header className="py-4 px-6 flex items-center justify-between">
         <div className="flex gap-6 text-sm font-medium">
           {categories.map((cat) => (
             <Link
@@ -21,8 +21,8 @@ export default function Layout() {
               to={`/${cat === 'all' ? '' : cat}`}
               className={`uppercase tracking-wide ${
                 category === cat || (!category && cat === 'all')
-                  ? 'text-green-600 border-b-2 border-green-600'
-                  : 'text-gray-500 hover:text-green-600'
+                  ? 'text-green-600 font-semibold border-b-2 border-green-600'
+                  : 'text-gray-500 hover:text-green-600' }
               }`}
             >
               {cat}
