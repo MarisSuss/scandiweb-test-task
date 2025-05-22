@@ -70,7 +70,7 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
       />
 
 
-      <div className="absolute top-16 right-4 z-50 bg-white border shadow-lg w-[420px] p-6 max-h-[90vh] overflow-y-auto">
+      <div className="absolute top-16 right-4 z-50 bg-white shadow-lg w-[420px] p-6 max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           data-testid="cart-btn"

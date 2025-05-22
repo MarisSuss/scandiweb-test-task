@@ -11,37 +11,52 @@ export default function Layout() {
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const [showCart, setShowCart] = useState(false);
 
-  return (
-    <div className="min-h-screen font-sans bg-white text-gray-900">
-      <header className="py-4 px-6 flex items-center justify-between">
-        <div className="flex gap-6 text-sm font-medium">
-          {categories.map((cat) => (
-            <Link
-              key={cat}
-              to={`/${cat === 'all' ? '' : cat}`}
-              className={`uppercase tracking-wide ${
-                category === cat || (!category && cat === 'all')
-                  ? 'text-green-600 font-semibold border-b-2 border-green-600'
-                  : 'text-gray-500 hover:text-green-600' }
-              }`}
-            >
-              {cat}
-            </Link>
-          ))}
-        </div>
+  <div>
+    
+  </div>
 
-        <button onClick={() => setShowCart(true)} className="relative text-xl">
-          🛒
-          {totalItems > 0 && (
-            <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-              {totalItems}
-            </span>
-          )}
-        </button>
+  return (
+    <div className="w-3/5 mx-auto font-sans bg-white text-gray-900">
+      <header>
+        <div className="px-4 py-4 flex justify-between items-center">
+          <nav className="flex gap-8 text-sm md:text-base">
+            {categories.map((cat) => {
+              const isActive = category === cat || (!category && cat === 'all');
+              return (
+                <Link key={cat} to={`/${cat === 'all' ? '' : cat}`}>
+                  <div
+                    className={`inline-block text-sm md:text-base uppercase tracking-wide transition font-medium border-b-2 pt-2 pb-7 px-4 ${
+                      isActive
+                        ? 'text-green-500 border-green-500'
+                        : 'text-black border-transparent hover:text-green-500'
+                    }`}
+                  >
+                    {cat}
+                  </div>
+                </Link>
+              );
+            })}
+          </nav>
+
+          <button
+            onClick={() => setShowCart(true)}
+            className="relative text-xl"
+            data-testid="cart-btn"
+          >
+            🛒
+            {totalItems > 0 && (
+              <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </div>
       </header>
 
-      <main className="p-8 max-w-7xl mx-auto">
-        <Outlet />
+      <main>
+        <div className="pt-8">
+          <Outlet />          
+        </div>
       </main>
 
       {showCart && <CartOverlay onClose={() => setShowCart(false)} />}

@@ -61,7 +61,7 @@ export default function ProductListPage() {
   const products = data?.products ?? [];
 
   return (
-    <div className="p-8">
+    <div className=" py-10">
       <h1 className="text-2xl font-semibold capitalize mb-4">{category}</h1>
       {products.length === 0 ? (
         <p>No products found.</p>

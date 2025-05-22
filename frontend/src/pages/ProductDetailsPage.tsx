@@ -73,7 +73,7 @@ export default function ProductDetailsPage() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto">
+    <div className="">
       <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
       <p className="text-gray-700 mb-4">Brand: {product.brand}</p>
       <img
