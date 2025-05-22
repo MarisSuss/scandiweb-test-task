@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * declare(strict_types=1);
+ * $output = $result->toArray(true); expects int, get's bool and throws type error
+ */
+
 namespace Src\Controller;
 
 use GraphQL\GraphQL as GraphQLBase;
@@ -11,6 +16,7 @@ use RuntimeException;
 use Throwable;
 
 class GraphQL {
+    // Handles the GraphQL request and returns the response
     static public function handle() {
         try {
             $queryType = new QueryType();

@@ -1,17 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Database;
 
 use PDO;
 use PDOException;
 
-class Connection {
+class Connection
+{
+    private PDO $pdo;
 
-    private $pdo;
-
-    public function __construct() {
+    // Establishes a new PDO connection using environment variables
+    public function __construct()
+    {
         $host = $_ENV['DB_HOST'];
-        $db = $_ENV['DB_NAME'];
+        $db   = $_ENV['DB_NAME'];
         $user = $_ENV['DB_USER'];
         $pass = $_ENV['DB_PASS'];
 
@@ -23,7 +27,9 @@ class Connection {
         }
     }
 
-    public function connect() {
+    // Returns the active PDO instance
+    public function connect(): PDO
+    {
         return $this->pdo;
     }
 }

@@ -1,14 +1,21 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\GraphQL\Queries;
 
 use GraphQL\Type\Definition\ObjectType;
 use GraphQL\Type\Definition\Type;
 use Src\GraphQL\Types\ProductType;
 use Src\GraphQL\Types\CategoryType;
+use Src\Models\ProductFactory;
+use Src\Models\Product;
 use Src\Database\Connection;
 use PDO;
 
+/**
+ * Defines top-level GraphQL queries: products, categories, and single product.
+ */
 class QueryType extends ObjectType
 {
     public function __construct()
@@ -18,20 +25,19 @@ class QueryType extends ObjectType
             'fields' => [
                 'categories' => [
                     'type' => Type::listOf(CategoryType::getInstance()),
-                    'resolve' => function () {
-                        $db = new Connection();
-                        $pdo = $db->connect();
+                    'resolve' => function (): array {
+                        $pdo = (new Connection())->connect();
                         $stmt = $pdo->query("SELECT id, name FROM categories");
                         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-                    }
+                    },
                 ],
                 'product' => [
                     'type' => ProductType::getInstance(),
                     'args' => [
-                        'sku' => Type::nonNull(Type::string())
+                        'sku' => Type::nonNull(Type::string()),
                     ],
-                    'resolve' => function ($root, $args) {
-                        $pdo = (new \Src\Database\Connection())->connect();
+                    'resolve' => function ($root, $args): ?Product {
+                        $pdo = (new Connection())->connect();
                         $stmt = $pdo->prepare("
                             SELECT p.*, c.id AS category_id, c.name AS category
                             FROM products p
@@ -40,21 +46,16 @@ class QueryType extends ObjectType
                         ");
                         $stmt->execute([':sku' => $args['sku']]);
                         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-                        if (!$row) {
-                            return null;
-                        }
-
-                        return \Src\Models\ProductFactory::create($row);
-                    }
+                        return $row ? ProductFactory::create($row) : null;
+                    },
                 ],
                 'products' => [
                     'type' => Type::listOf(ProductType::getInstance()),
                     'args' => [
-                        'category' => Type::string()
+                        'category' => Type::string(),
                     ],
-                    'resolve' => function ($root, $args) {
-                        $pdo = (new \Src\Database\Connection())->connect();
+                    'resolve' => function ($root, $args): array {
+                        $pdo = (new Connection())->connect();
 
                         if (!isset($args['category']) || strtolower($args['category']) === 'all') {
                             $stmt = $pdo->query("
@@ -74,13 +75,13 @@ class QueryType extends ObjectType
 
                         $products = [];
                         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-                            $products[] = \Src\Models\ProductFactory::create($row);
+                            $products[] = ProductFactory::create($row);
                         }
 
                         return $products;
-                    }
-                ]
-            ]
+                    },
+                ],
+            ],
         ]);
     }
 }

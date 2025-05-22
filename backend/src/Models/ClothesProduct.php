@@ -1,9 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\Models;
 
-class ClothesProduct extends Product {
-    public function getType(): string {
+/**
+ * Represents a clothing product.
+ */
+class ClothesProduct extends Product
+{
+    /**
+     * Category-level identifier for internal logic.
+     */
+    public function getType(): string
+    {
         return 'clothes';
     }
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Src\GraphQL\Mutations;
 
 use GraphQL\Type\Definition\ObjectType;
@@ -27,14 +29,16 @@ class MutationType extends ObjectType
                         'gallery' => Type::nonNull(Type::listOf(Type::nonNull(Type::string()))),
                         'description' => Type::string(),
                         'category_id' => Type::nonNull(Type::int()),
-                        'in_stock' => Type::nonNull(Type::boolean())
+                        'in_stock' => Type::nonNull(Type::boolean()),
                     ],
                     'resolve' => function ($root, $args) {
-                        $db = new Connection();
-                        $pdo = $db->connect();
+                        $pdo = (new Connection())->connect();
 
-                        $stmt = $pdo->prepare("INSERT INTO products (sku, name, price, brand, gallery, description, category_id, in_stock)
-                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                        $stmt = $pdo->prepare(
+                            "INSERT INTO products (sku, name, price, brand, gallery, description, category_id, in_stock)
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                        );
+
                         $stmt->execute([
                             $args['sku'],
                             $args['name'],
@@ -43,93 +47,93 @@ class MutationType extends ObjectType
                             json_encode($args['gallery']),
                             $args['description'] ?? '',
                             $args['category_id'],
-                            $args['in_stock'] ? 1 : 0
+                            $args['in_stock'] ? 1 : 0,
                         ]);
 
                         $args['id'] = $pdo->lastInsertId();
                         return $args;
-                    }
+                    },
                 ],
                 'updateProduct' => [
                     'type' => ProductType::getInstance(),
                     'args' => [
                         'id' => Type::nonNull(Type::int()),
                         'name' => Type::string(),
-                        'price' => Type::float()
+                        'price' => Type::float(),
                     ],
                     'resolve' => function ($root, $args) {
-                        $db = new Connection();
-                        $pdo = $db->connect();
+                        $pdo = (new Connection())->connect();
 
                         $fields = [];
                         $values = [];
+
                         if (isset($args['name'])) {
                             $fields[] = 'name = ?';
                             $values[] = $args['name'];
                         }
+
                         if (isset($args['price'])) {
                             $fields[] = 'price = ?';
                             $values[] = $args['price'];
                         }
 
                         $values[] = $args['id'];
-
                         $sql = "UPDATE products SET " . implode(', ', $fields) . " WHERE id = ?";
                         $stmt = $pdo->prepare($sql);
                         $stmt->execute($values);
 
                         return $args;
-                    }
+                    },
                 ],
                 'deleteProducts' => [
                     'type' => Type::listOf(Type::int()),
                     'args' => [
-                        'ids' => Type::nonNull(Type::listOf(Type::nonNull(Type::int())))
+                        'ids' => Type::nonNull(Type::listOf(Type::nonNull(Type::int()))),
                     ],
                     'resolve' => function ($root, $args) {
-                        $db = new Connection();
-                        $pdo = $db->connect();
+                        $pdo = (new Connection())->connect();
 
-                        $inQuery = implode(',', array_fill(0, count($args['ids']), '?'));
-                        $stmt = $pdo->prepare("DELETE FROM products WHERE id IN ($inQuery)");
+                        $placeholders = implode(',', array_fill(0, count($args['ids']), '?'));
+                        $stmt = $pdo->prepare("DELETE FROM products WHERE id IN ($placeholders)");
                         $stmt->execute($args['ids']);
 
                         return $args['ids'];
-                    }
+                    },
                 ],
                 'addOrder' => [
                     'type' => new OrderResponseType(),
                     'args' => [
                         'input' => [
-                            'type' => Type::nonNull(Type::listOf(Type::nonNull(new OrderItemInputType())))
-                        ]
+                            'type' => Type::nonNull(Type::listOf(Type::nonNull(new OrderItemInputType()))),
+                        ],
                     ],
                     'resolve' => function ($root, $args) {
-                        $db = new Connection();
-                        $pdo = $db->connect();
+                        $pdo = (new Connection())->connect();
 
-                        $stmt = $pdo->prepare("INSERT INTO orders () VALUES ()");
-                        $stmt->execute();
+                        $pdo->prepare("INSERT INTO orders () VALUES ()")->execute();
                         $orderId = $pdo->lastInsertId();
 
-                        $stmtItem = $pdo->prepare("INSERT INTO order_items (order_id, product_id, quantity, selected_attributes) VALUES (?, ?, ?, ?)");
+                        $stmt = $pdo->prepare(
+                            "INSERT INTO order_items (order_id, product_id, quantity, selected_attributes)
+                             VALUES (?, ?, ?, ?)"
+                        );
 
                         foreach ($args['input'] as $item) {
-                            $stmtItem->execute([
+                            $stmt->execute([
                                 $orderId,
                                 $item['product_id'],
                                 $item['quantity'],
-                                $item['selectedAttributes']
+                                $item['selectedAttributes'],
                             ]);
                         }
 
                         return [
                             'success' => true,
-                            'orderId' => (int)$orderId
+                            'orderId' => (int) $orderId,
                         ];
-                    }
-                ]
-            ]
+                    },
+                ],
+            ],
         ]);
     }
 }
