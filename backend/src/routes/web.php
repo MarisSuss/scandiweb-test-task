@@ -8,6 +8,12 @@ use Src\Controller\GraphQL;
 
 $dispatcher = simpleDispatcher(function (RouteCollector $r) {
     $r->post('/graphql', [GraphQL::class, 'handle']);
+
+    $r->get('/health', function () {
+        header('Content-Type: application/json');
+        echo json_encode(['status' => 'ok']);
+        exit;
+    });
 });
 
 $routeInfo = $dispatcher->dispatch(
