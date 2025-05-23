@@ -102,14 +102,13 @@ export default function ProductListPage() {
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           {data?.products.map((product) => {
             const isInStock = product.in_stock;
-            const kebabName = product.name.toLowerCase().replace(/\s+/g, '-');
 
             return (
               <div
                 key={product.id}
-                data-testid={`product-${kebabName}`}
-                className={`relative p-4 border rounded group transition duration-200 ${
-                  !isInStock ? 'opacity-60' : ''
+                data-testid={`product-${product.sku}`}
+                className={`relative p-4 group transition duration-200 ${
+                  !isInStock ? 'opacity-60' : 'hover:shadow-lg'
                 }`}
               >
                 <Link to={`/${category}/${product.sku}`}>
