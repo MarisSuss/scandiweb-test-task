@@ -60,7 +60,7 @@ export default function ProductDetailsPage() {
 
   const { data, isLoading } = useQuery<{ product: Product }>({
     queryKey: ['product', sku],
-    queryFn: () => request('http://localhost:4000/graphql', QUERY, { sku }),
+    queryFn: () => request(import.meta.env.VITE_API_URL, QUERY, { sku }),
   });
 
   const product = data?.product;

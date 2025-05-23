@@ -46,7 +46,7 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
     }));
 
     try {
-      const response: AddOrderResponse = await request('http://localhost:4000/graphql', ADD_ORDER, { input });
+      const response: AddOrderResponse = await request(import.meta.env.VITE_API_URL, ADD_ORDER, { input });
       if (response.addOrder.success) {
         alert(`Order placed! ID: ${response.addOrder.orderId}`);
         dispatch({ type: 'CLEAR_CART' });

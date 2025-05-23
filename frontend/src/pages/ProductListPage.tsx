@@ -38,7 +38,7 @@ export default function ProductListPage() {
   const { data, isLoading, error } = useQuery<ProductQueryResult>({
     queryKey: ['categoryProducts', category],
     queryFn: async (): Promise<ProductQueryResult> => {
-      const res = await request<ProductQueryResult>('http://localhost:4000/graphql', QUERY, {
+      const res = await request<ProductQueryResult>(import.meta.env.VITE_API_URL, QUERY, {
         category: category === 'all' ? undefined : category,
       });
 

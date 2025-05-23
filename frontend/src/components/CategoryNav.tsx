@@ -3,7 +3,7 @@ import type { JSX } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { request, gql } from 'graphql-request';
 
-const endpoint = 'http://localhost:8000/graphql';
+const endpoint = import.meta.env.VITE_API_URL;
 
 const CATEGORY_QUERY = gql`
   {
