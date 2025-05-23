@@ -107,11 +107,10 @@ export default function ProductListPage() {
               <div
                 key={product.id}
                 className="relative p-4 group transition duration-200 hover:shadow-lg"
-                data-testid={`product-${product.sku}`}
               >
                 <Link to={`/${category}/${product.sku}`} className="block relative" >
 
-                  <div className="relative mb-2">
+                  <div className="relative mb-2" data-testid={`product-${product.sku}`}>
                     <img
                       src={product.gallery[0]}
                       alt={product.name}
