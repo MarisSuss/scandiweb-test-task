@@ -11,10 +11,6 @@ export default function Layout() {
   const totalItems = state.items.reduce((sum, item) => sum + item.quantity, 0);
   const [showCart, setShowCart] = useState(false);
 
-  <div>
-    
-  </div>
-
   return (
     <div className="w-3/5 mx-auto font-sans bg-white text-gray-900">
       <header>
@@ -23,7 +19,11 @@ export default function Layout() {
             {categories.map((cat) => {
               const isActive = category === cat || (!category && cat === 'all');
               return (
-                <Link key={cat} to={`/${cat === 'all' ? '' : cat}`}>
+                <Link
+                  key={cat}
+                  to={`/${cat === 'all' ? '' : cat}`}
+                  data-testid={isActive ? 'active-category-link' : 'category-link'}
+                >
                   <div
                     className={`inline-block text-sm md:text-base uppercase tracking-wide transition font-medium border-b-2 pt-2 pb-7 px-4 ${
                       isActive
@@ -55,7 +55,7 @@ export default function Layout() {
 
       <main>
         <div className="pt-8">
-          <Outlet />          
+          <Outlet />
         </div>
       </main>
 
