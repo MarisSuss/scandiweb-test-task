@@ -101,11 +101,10 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
                         <div className="flex gap-2">
                           {attributeSet?.items.map((attrItem: any) => {
                             const isSelected = attrItem.id === value;
-                            const kebabVal = attrItem.id.toLowerCase().replace(/\s+/g, '-');
                             return (
                               <button
                                 key={attrItem.id}
-                                data-testid={`cart-item-attribute-${kebabKey}-${kebabVal}${isSelected ? '-selected' : ''}`}
+                                data-testid='cart-btn'
                                 className={`border rounded disabled cursor-default ${
                                   isColor ? 'w-6 h-6 border-white' : 'px-2 py-1 text-sm'
                                 } ${isSelected ? (isColor ? 'ring-2 ring-green-500' : 'bg-black text-white') : ''}`}
