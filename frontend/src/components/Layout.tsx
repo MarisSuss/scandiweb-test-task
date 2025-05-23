@@ -21,7 +21,7 @@ export default function Layout() {
               return (
                 <Link
                   key={cat}
-                  to={`/${cat === 'all' ? '' : cat}`}
+                  to={`/${cat}`}
                   data-testid={isActive ? 'active-category-link' : 'category-link'}
                 >
                   <div
