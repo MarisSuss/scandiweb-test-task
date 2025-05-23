@@ -107,25 +107,27 @@ export default function ProductListPage() {
               <div
                 key={product.id}
                 data-testid={`product-${product.sku}`}
-                className={`relative p-4 group transition duration-200 ${
-                  !isInStock ? 'opacity-60' : 'hover:shadow-lg'
-                }`}
+                className="relative p-4 group transition duration-200 hover:shadow-lg"
               >
-                <Link to={`/${category}/${product.sku}`}>
+                <Link to={`/${category}/${product.sku}`} className="block relative">
                   <div className="relative mb-2">
                     <img
                       src={product.gallery[0]}
                       alt={product.name}
-                      className="w-full aspect-square object-cover"
+                      className={`w-full aspect-square object-cover transition ${
+                        !isInStock ? 'grayscale opacity-60' : ''
+                      }`}
                     />
                     {!isInStock && (
-                      <span className="absolute top-1 left-1 bg-black text-white text-xs px-2 py-1">
-                        OUT OF STOCK
-                      </span>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <span className="text-xl font-semibold text-gray-500 tracking-wide">
+                          OUT OF STOCK
+                        </span>
+                      </div>
                     )}
                   </div>
-                  <h2 className="font-medium">{product.name}</h2>
-                  <p className="text-gray-600">${product.price.toFixed(2)}</p>
+                  <h2 className="text-gray-600">{product.name}</h2>
+                  <p className="font-medium">${product.price.toFixed(2)}</p>
                 </Link>
 
                 {isInStock && (
