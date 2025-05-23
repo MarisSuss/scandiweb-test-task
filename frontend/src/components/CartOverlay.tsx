@@ -107,8 +107,8 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
                                 key={attrItem.id}
                                 data-testid={`cart-item-attribute-${kebabKey}-${kebabVal}${isSelected ? '-selected' : ''}`}
                                 className={`border rounded disabled cursor-default ${
-                                  isColor ? 'w-6 h-6' : 'px-2 py-1 text-sm'
-                                } ${isSelected ? (isColor ? 'ring-2 ring-black' : 'bg-black text-white') : ''}`}
+                                  isColor ? 'w-6 h-6 border-white' : 'px-2 py-1 text-sm'
+                                } ${isSelected ? (isColor ? 'ring-2 ring-green-500' : 'bg-black text-white') : ''}`}
                                 style={isColor ? { backgroundColor: attrItem.value } : {}}
                                 disabled
                               >
@@ -124,37 +124,31 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
               )}
             </div>
 
-            <div className="flex flex-col items-center justify-between w-24 shrink-0">
+            <div className="flex flex-col justify-between items-center">
               <button
                 data-testid="cart-item-amount-increase"
-                onClick={() =>
-                  handleQuantityChange(item.id, item.selectedAttributes, item.quantity + 1)
-                }
-                className="border w-8 h-8 text-lg font-bold"
+                onClick={() => handleQuantityChange(item.id, item.selectedAttributes, item.quantity + 1)}
+                className="border w-6 h-6 text-sm font-bold"
               >
                 +
               </button>
-
-              <span data-testid="cart-item-amount" className="font-medium">
+              <span data-testid="cart-item-amount" className="text-sm">
                 {item.quantity}
               </span>
-
               <button
                 data-testid="cart-item-amount-decrease"
-                onClick={() =>
-                  handleQuantityChange(item.id, item.selectedAttributes, item.quantity - 1)
-                }
-                className="border w-8 h-8 text-lg font-bold"
+                onClick={() => handleQuantityChange(item.id, item.selectedAttributes, item.quantity - 1)}
+                className="border w-6 h-6 text-sm font-bold"
               >
                 −
               </button>
-
-              <img
-                src={item.gallery?.[0]}
-                alt={item.name}
-                className="mt-2 w-full h-24 object-cover"
-              />
             </div>
+
+            <img
+              src={item.gallery?.[0]}
+              alt={item.name}
+              className="w-40 h-50 object-cover"
+            />
           </div>
         ))}
 
