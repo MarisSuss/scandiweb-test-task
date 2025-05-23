@@ -104,7 +104,6 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
                             return (
                               <button
                                 key={attrItem.id}
-                                data-testid='cart-btn'
                                 className={`border rounded disabled cursor-default ${
                                   isColor ? 'w-6 h-6 border-white' : 'px-2 py-1 text-sm'
                                 } ${isSelected ? (isColor ? 'ring-2 ring-green-500' : 'bg-black text-white') : ''}`}
