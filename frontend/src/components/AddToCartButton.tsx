@@ -3,13 +3,16 @@ import { useCart } from '../context/CartContext';
 export default function AddToCartButton({
   product,
   selectedAttributes,
+  disabled = false,
 }: {
   product: any;
   selectedAttributes: { [key: string]: string };
+  disabled?: boolean;
 }) {
   const { dispatch } = useCart();
 
   const handleAdd = () => {
+    if (disabled) return;
     dispatch({
       type: 'ADD_TO_CART',
       payload: {
@@ -31,9 +34,14 @@ export default function AddToCartButton({
   return (
     <button
       onClick={handleAdd}
-      disabled={!allAttributesSelected}
+      disabled={!allAttributesSelected || disabled}
       data-testid="add-to-cart"
-      className="mt-2 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+      className={`w-full py-4 mt-2 text-lg font-semibold text-white transition ${
+        !allAttributesSelected || disabled
+          ? 'bg-gray-400 cursor-not-allowed'
+          : 'bg-green-600 hover:bg-green-700'
+      }`}
+      style={{ borderRadius: 0 }}
     >
       Add to Cart
     </button>
