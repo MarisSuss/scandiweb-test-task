@@ -28,7 +28,7 @@ function CategoryNav(): JSX.Element {
   }, []);
 
   return (
-    <nav style={{ padding: '1rem' }}>
+    <nav data-testid="category-nav" style={{ padding: '1rem' }}>
       {categories.map((category) => {
         const isActive = category.name === categoryName;
         return (
