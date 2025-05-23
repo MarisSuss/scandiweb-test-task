@@ -24,8 +24,17 @@ export default function AddToCartButton({
     });
   };
 
+  const allAttributesSelected = product.attributes.every(
+    (attr: any) => selectedAttributes[attr.id]
+  );
+
   return (
-    <button onClick={handleAdd} className="mt-2 bg-blue-600 text-white px-4 py-2 rounded">
+    <button
+      onClick={handleAdd}
+      disabled={!allAttributesSelected}
+      data-testid="add-to-cart"
+      className="mt-2 bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+    >
       Add to Cart
     </button>
   );
