@@ -29,18 +29,22 @@ function CategoryNav(): JSX.Element {
 
   return (
     <nav style={{ padding: '1rem' }}>
-      {categories.map((category) => (
-        <Link
-          key={category.name}
-          to={`/${category.name}`}
-          style={{
-            marginRight: '1rem',
-            fontWeight: category.name === categoryName ? 'bold' : 'normal',
-          }}
-        >
-          {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
-        </Link>
-      ))}
+      {categories.map((category) => {
+        const isActive = category.name === categoryName;
+        return (
+          <Link
+            key={category.name}
+            to={`/${category.name}`}
+            data-testid={isActive ? 'active-category-link' : 'category-link'}
+            style={{
+              marginRight: '1rem',
+              fontWeight: isActive ? 'bold' : 'normal',
+            }}
+          >
+            {category.name.charAt(0).toUpperCase() + category.name.slice(1)}
+          </Link>
+        );
+      })}
     </nav>
   );
 }

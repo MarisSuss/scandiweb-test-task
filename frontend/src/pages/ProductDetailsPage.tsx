@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { gql, request } from 'graphql-request';
-import DOMPurify from 'dompurify';
 import AddToCartButton from '../components/AddToCartButton';
 
 const QUERY = gql`
@@ -175,8 +174,9 @@ export default function ProductDetailsPage() {
         <div
           className="text-sm text-gray-600 leading-relaxed"
           data-testid="product-description"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(product.description) }}
-        />
+        >
+          {product.description}
+        </div>
       </div>
     </div>
   );
