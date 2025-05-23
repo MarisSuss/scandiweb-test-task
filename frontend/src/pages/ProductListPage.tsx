@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { gql, request } from 'graphql-request';
+import { useCart } from '../context/CartContext';
 
 const QUERY = gql`
   query GetProducts($category: String) {
@@ -13,75 +14,109 @@ const QUERY = gql`
       in_stock
       description
       price
+      attributes {
+        id
+        name
+        type
+        items {
+          id
+          value
+          displayValue
+        }
+      }
     }
   }
 `;
 
 type Product = {
   id: string;
-  name?: string;
-  sku?: string;
-  brand?: string;
-  gallery?: string[];
-  in_stock?: boolean;
-  description?: string;
-  price?: number;
-};
-
-type ProductQueryResult = {
-  products: Product[];
+  name: string;
+  sku: string;
+  brand: string;
+  gallery: string[];
+  in_stock: boolean;
+  description: string;
+  price: number;
+  attributes: {
+    id: string;
+    name: string;
+    type: string;
+    items: {
+      id: string;
+      value: string;
+      displayValue: string;
+    }[];
+  }[];
 };
 
 export default function ProductListPage() {
   const { category = 'all' } = useParams();
+  const { dispatch } = useCart();
 
-  const { data, isLoading, error } = useQuery<ProductQueryResult>({
+  const { data, isLoading, error } = useQuery<{ products: Product[] }>({
     queryKey: ['categoryProducts', category],
-    queryFn: async (): Promise<ProductQueryResult> => {
-      const res = await request<ProductQueryResult>(import.meta.env.VITE_API_URL, QUERY, {
+    queryFn: async () => {
+      const res = await request<{ products: Product[] }>(import.meta.env.VITE_API_URL, QUERY, {
         category: category === 'all' ? undefined : category,
       });
-
-      if (!res || !res.products) {
-        return { products: [] };
-      }
-
       return res;
-    }
+    },
   });
 
   if (isLoading) return <div className="p-8">Loading...</div>;
-  if (error) return (
-    <div className="p-8 text-red-600">
-      Error loading products:<br />
-      <pre>{error.message}</pre>
-    </div>
-  );
+  if (error) {
+    return (
+      <div className="p-8 text-red-600">
+        Error loading products:<br />
+        <pre>{(error as Error).message}</pre>
+      </div>
+    );
+  }
 
-  const products = data?.products ?? [];
+  const handleQuickShop = (product: Product) => {
+    const defaultAttributes: { [key: string]: string } = {};
+    product.attributes.forEach(attr => {
+      defaultAttributes[attr.id] = attr.items[0].id;
+    });
+
+    dispatch({
+      type: 'ADD_TO_CART',
+      payload: {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        gallery: product.gallery,
+        quantity: 1,
+        selectedAttributes: defaultAttributes,
+        attributes: product.attributes,
+      },
+    });
+  };
 
   return (
-    <div className=" py-10">
+    <div className="py-10">
       <h1 className="text-4xl font-semibold capitalize mb-4">{category}</h1>
-      {products.length === 0 ? (
+      {data?.products.length === 0 ? (
         <p>No products found.</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {products.map((product) => {
-            const isInStock = product.in_stock ?? true;
+          {data?.products.map((product) => {
+            const isInStock = product.in_stock;
+            const kebabName = product.name.toLowerCase().replace(/\s+/g, '-');
 
             return (
               <div
                 key={product.id}
-                className={`relative p-4 ${
+                data-testid={`product-${kebabName}`}
+                className={`relative p-4 border rounded group transition duration-200 ${
                   !isInStock ? 'opacity-60' : ''
                 }`}
               >
-                <Link to={`/${category}/${product.sku ?? product.id}`}>
+                <Link to={`/${category}/${product.sku}`}>
                   <div className="relative mb-2">
                     <img
-                      src={product.gallery?.[0] ?? 'https://via.placeholder.com/200'}
-                      alt={product.name ?? 'Product'}
+                      src={product.gallery[0]}
+                      alt={product.name}
                       className="w-full aspect-square object-cover"
                     />
                     {!isInStock && (
@@ -90,11 +125,18 @@ export default function ProductListPage() {
                       </span>
                     )}
                   </div>
-                  <h2 className="font-medium">{product.name ?? 'Unnamed Product'}</h2>
-                  <p className="text-gray-600">
-                    ${product.price?.toFixed(2) ?? '?.??'}
-                  </p>
+                  <h2 className="font-medium">{product.name}</h2>
+                  <p className="text-gray-600">${product.price.toFixed(2)}</p>
                 </Link>
+
+                {isInStock && (
+                  <button
+                    onClick={() => handleQuickShop(product)}
+                    className="absolute bottom-4 right-4 bg-green-500 text-white rounded-full p-2 hidden group-hover:block"
+                  >
+                    🛒
+                  </button>
+                )}
               </div>
             );
           })}
