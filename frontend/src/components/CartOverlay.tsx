@@ -80,7 +80,10 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
         </button>
 
         <h2 className="text-xl font-bold mb-6">
-          My Bag, <span className="font-normal">{state.items.length} items</span>
+          My Bag, <span className="font-normal">
+            {state.items.reduce((sum, item) => sum + item.quantity, 0)}{" "}
+            {state.items.reduce((sum, item) => sum + item.quantity, 0) === 1 ? "item" : "items"}
+          </span>
         </h2>
 
         {state.items.map((item, idx) => (
@@ -168,7 +171,12 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
           <button
             data-testid="place-order"
             onClick={handlePlaceOrder}
-            className="w-full bg-green-600 text-white py-3 font-bold rounded hover:bg-green-700 transition"
+            disabled={state.items.length === 0}
+            className={`w-full py-3 font-bold rounded transition ${
+              state.items.length === 0
+                ? 'bg-green-600 opacity-50 cursor-not-allowed text-white'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
           >
             PLACE ORDER
           </button>

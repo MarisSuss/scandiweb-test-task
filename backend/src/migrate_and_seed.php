@@ -6,7 +6,7 @@ require __DIR__ . '/../vendor/autoload.php';
 
 use Src\Database\Connection;
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../src');
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
 $db = new Connection();
