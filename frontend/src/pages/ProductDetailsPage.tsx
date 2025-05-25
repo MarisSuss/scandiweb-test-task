@@ -130,7 +130,6 @@ export default function ProductDetailsPage() {
           const isColor = attrSet.name.toLowerCase() === 'color';
           return (
             <div key={attrSet.id} className="space-y-2" data-testid={`product-attribute-${toKebabCase(attrSet.name)}`}>
-              <p>data-testid={`product-${toKebabCase(attrSet.name)}`}</p>
               <h4 className="uppercase font-bold text-sm">{attrSet.name}:</h4>
               <div className="flex gap-2">
                 {attrSet.items.map((item: AttributeItem) => {
@@ -143,7 +142,7 @@ export default function ProductDetailsPage() {
                       }`}
                       style={isColor ? { backgroundColor: item.value } : {}}
                       onClick={() => handleSelectAttribute(attrSet.id, item.id)}
-                      data-testid={`product-attribute-${item.id}`}
+                      data-testid={`product-attribute-${toKebabCase(attrSet.name)}-${item.id}`}
                     >
                       {!isColor && item.displayValue}
                     </button>
