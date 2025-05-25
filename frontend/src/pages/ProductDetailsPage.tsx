@@ -127,9 +127,8 @@ export default function ProductDetailsPage() {
 
         {product.attributes.map((attrSet: AttributeSet) => {
           const isColor = attrSet.name.toLowerCase() === 'color';
-          const kebabName = attrSet.name.toLowerCase().replace(/\s+/g, '-');
           return (
-            <div key={attrSet.id} className="space-y-2" data-testid={`product-attribute-${kebabName}`}>
+            <div key={attrSet.id} className="space-y-2">
               <h4 className="uppercase font-bold text-sm">{attrSet.name}:</h4>
               <div className="flex gap-2">
                 {attrSet.items.map((item: AttributeItem) => {
@@ -142,6 +141,7 @@ export default function ProductDetailsPage() {
                       }`}
                       style={isColor ? { backgroundColor: item.value } : {}}
                       onClick={() => handleSelectAttribute(attrSet.id, item.id)}
+                      data-testid={`product-attribute-${item.id}`}
                     >
                       {!isColor && item.displayValue}
                     </button>
@@ -158,6 +158,7 @@ export default function ProductDetailsPage() {
         </div>
 
         <AddToCartButton
+          data-testid="add-to-cart"
           product={product}
           selectedAttributes={selectedAttributes}
           disabled={!product.in_stock}
