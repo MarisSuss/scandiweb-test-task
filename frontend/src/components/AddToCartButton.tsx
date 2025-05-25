@@ -1,4 +1,5 @@
 import { useCart } from '../context/CartContext';
+import { useCartUI } from '../context/CartUIContext';
 
 export default function AddToCartButton({
   product,
@@ -10,6 +11,7 @@ export default function AddToCartButton({
   disabled?: boolean;
 }) {
   const { dispatch } = useCart();
+  const { openCart } = useCartUI();
 
   const handleAdd = () => {
     if (disabled) return;
@@ -25,6 +27,7 @@ export default function AddToCartButton({
         attributes: product.attributes,
       },
     });
+    openCart();
   };
 
   const allAttributesSelected = product.attributes.every(
