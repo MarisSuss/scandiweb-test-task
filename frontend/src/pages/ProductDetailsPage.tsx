@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { gql, request } from 'graphql-request';
 import AddToCartButton from '../components/AddToCartButton';
+import { toKebabCase } from '../utils/stringUtils';
 
 const QUERY = gql`
   query getProductBySku($sku: String!) {
@@ -128,7 +129,7 @@ export default function ProductDetailsPage() {
         {product.attributes.map((attrSet: AttributeSet) => {
           const isColor = attrSet.name.toLowerCase() === 'color';
           return (
-            <div key={attrSet.id} className="space-y-2">
+            <div key={attrSet.id} className="space-y-2" data-testid={`product-${toKebabCase(attrSet.name)}`}>
               <h4 className="uppercase font-bold text-sm">{attrSet.name}:</h4>
               <div className="flex gap-2">
                 {attrSet.items.map((item: AttributeItem) => {
