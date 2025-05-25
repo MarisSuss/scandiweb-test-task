@@ -42,7 +42,7 @@ export default function Layout() {
 
             <button
               data-testid="cart-btn"
-              onClick={() => setShowCart(true)}
+              onClick={() => setShowCart(prev => !prev)}
               className="relative text-xl"
             >
               🛒

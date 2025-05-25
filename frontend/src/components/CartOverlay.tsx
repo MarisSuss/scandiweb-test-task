@@ -1,5 +1,6 @@
 import { useCart } from '../context/CartContext';
 import { gql, request } from 'graphql-request';
+import { toKebabCase } from '../utils/stringUtils';
 
 const ADD_ORDER = gql`
   mutation AddOrder($input: [OrderItemInput!]!) {
@@ -93,10 +94,9 @@ export default function CartOverlay({ onClose }: { onClose: () => void }) {
                   {Object.entries(item.selectedAttributes).map(([key, value]) => {
                     const attributeSet = item.attributes?.find((a: any) => a.name === key);
                     const isColor = key.toLowerCase() === 'color';
-                    const kebabKey = key.toLowerCase().replace(/\s+/g, '-');
 
                     return (
-                      <div key={key} data-testid={`cart-item-attribute-${kebabKey}`}>
+                      <div key={key} data-testid={`cart-item-attribute-${toKebabCase(key)}`}>
                         <div className="font-semibold mb-1">{key}:</div>
                         <div className="flex gap-2">
                           {attributeSet?.items.map((attrItem: any) => {
