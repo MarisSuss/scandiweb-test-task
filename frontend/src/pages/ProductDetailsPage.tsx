@@ -129,8 +129,8 @@ export default function ProductDetailsPage() {
         {product.attributes.map((attrSet: AttributeSet) => {
           const isColor = attrSet.name.toLowerCase() === 'color';
           return (
-            <div key={attrSet.id} className="space-y-2" data-testid={`product-${toKebabCase(attrSet.name)}`}>
-              <h4 className="uppercase font-bold text-sm">{attrSet.name}:</h4>
+            <div key={attrSet.id} className="space-y-2">
+              <h4 className="uppercase font-bold text-sm" data-testid={`product-${toKebabCase(attrSet.name)}`}>{attrSet.name}:</h4>
               <div className="flex gap-2">
                 {attrSet.items.map((item: AttributeItem) => {
                   const isSelected = selectedAttributes[attrSet.id] === item.id;
