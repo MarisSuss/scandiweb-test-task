@@ -39,9 +39,9 @@ export default function Layout() {
           </nav>
 
           <button
+            data-testid="cart-btn"          
             onClick={() => setShowCart(true)}
             className="relative text-xl"
-            data-testid="cart-btn"
           >
             🛒
             {totalItems > 0 && (

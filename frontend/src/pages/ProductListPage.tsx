@@ -108,7 +108,7 @@ export default function ProductListPage() {
                 key={product.id}
                 className="relative p-4 group transition duration-200 hover:shadow-lg"
               >
-                <Link to={`/${category}/${product.sku}`} className="block relative" data-testid={`product-${product.sku}`} >
+                <Link to={`/${category}/${product.sku}`} className="block relative">
 
                   <div className="relative mb-2">
                     <img
@@ -126,7 +126,7 @@ export default function ProductListPage() {
                       </div>
                     )}
                   </div>
-                  <h2 className="text-gray-600">{product.name}</h2>
+                  <h2 className="text-gray-600" data-testid={`product-${product.sku}`}>{product.name}</h2>
                   <p className="font-medium">${product.price.toFixed(2)}</p>
                 </Link>
 
