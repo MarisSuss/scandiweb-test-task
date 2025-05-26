@@ -3,7 +3,7 @@
 
 ## Overview
 
-This repository contains my submission for the Scandiweb Junior Full Stack Developer test task. The project demonstrates a complete implementation of a product management applicationsimple e-commerce website all aligned with the given specifications.
+This repository contains my submission for the Scandiweb Junior Full Stack Developer test task. The project demonstrates a simple e-commerce website all aligned with the given specifications.
 
 Live Demo: [https://scandiweb-test-task.up.railway.app](https://scandiweb-test-task.up.railway.app)  
 GitHub Repo: [https://github.com/MarisSuss/scandiweb-test-task](https://github.com/MarisSuss/scandiweb-test-task)
