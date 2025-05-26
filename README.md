@@ -57,7 +57,7 @@ GitHub Repo: [https://github.com/MarisSuss/scandiweb-test-task](https://github.c
 
    - In diferent terminal navigate to scandiweb-test-task
 
-      ```bash
+   ```bash
    cd frontend
    npm install
    npm run dev
