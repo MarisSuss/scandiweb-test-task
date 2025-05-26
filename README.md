@@ -55,7 +55,7 @@ GitHub Repo: [https://github.com/MarisSuss/scandiweb-test-task](https://github.c
 
 5. **Frontend setup**
 
-   - In diferent terminal navigate to scandiweb-test-task
+   - In a diferent terminal navigate to scandiweb-test-task
 
    ```bash
    cd frontend
